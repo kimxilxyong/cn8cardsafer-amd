@@ -115,6 +115,11 @@ struct GpuContext
     xmrig::String board;
     xmrig::String name;
 
+    /* PCI-E values*/
+    uint32_t device_pciBusID;
+    uint32_t device_pciDeviceID;
+    uint32_t device_pciDomainID;
+
     uint32_t Nonce;
 };
 

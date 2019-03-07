@@ -66,6 +66,13 @@ public:
     static void stop();
     static void submit(const Job &result);
 
+    static void setMaxtemp(int maxtemp);
+    static void setFalloff(int falloff);
+    static void setFanlevel(int fanlevel);
+    static inline int maxtemp() { return m_maxtemp; }
+    static inline int falloff() { return m_falloff; }
+    static inline int fanlevel() { return m_fanlevel; }
+
     static inline bool isEnabled()                               { return m_enabled; }
     static inline bool isOutdated(uint64_t sequence)             { return m_sequence.load(std::memory_order_relaxed) != sequence; }
     static inline bool isPaused()                                { return m_paused.load(std::memory_order_relaxed) == 1; }
@@ -101,6 +108,10 @@ private:
     static uv_rwlock_t m_rwlock;
     static uv_timer_t m_timer;
     static xmrig::Controller *m_controller;
+    static int m_maxtemp;
+    static int m_falloff;
+    static int m_fanlevel;
+
 };
 
 

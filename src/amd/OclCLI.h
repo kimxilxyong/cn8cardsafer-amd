@@ -58,6 +58,8 @@ public:
     inline void parseStridedIndex(const char *arg) { parse(m_stridedIndex, arg); }
     inline void parseUnrollFactor(const char *arg) { parse(m_unrollFactor, arg); }
 
+    static int getPCIInfo(GpuContext *context, int DeviceId);
+
 private:
     enum Hints {
         None          = 0,

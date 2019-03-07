@@ -28,20 +28,45 @@
 #include <stdio.h>
 #include <algorithm>
 
+#include <CL/cl_ext.h>
 
 #include "amd/cryptonight.h"
 #include "amd/OclCLI.h"
 #include "amd/OclGPU.h"
+#include "amd/OclLib.h"
 #include "common/log/Log.h"
 #include "core/Config.h"
 #include "crypto/CryptoNight_constants.h"
 #include "workers/OclThread.h"
 
 
+
 OclCLI::OclCLI()
 {
 }
 
+int OclCLI::getPCIInfo(GpuContext *context, int DeviceId)
+{
+
+    cl_device_topology_amd topology;
+
+    cl_int status = OclLib::getDeviceInfo(context->DeviceID, CL_DEVICE_TOPOLOGY_AMD,
+        sizeof(cl_device_topology_amd), &topology, NULL);
+
+    if (status != CL_SUCCESS) {
+        // Handle error
+        LOG_ERR("Failed to get clGetDeviceInfo %u", status);
+    }
+
+    if (topology.raw.type == CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD) {
+        LOG_DEBUG("****************** m_ctx->deviceIdx %u INFO: Topology: PCI[ B#%u D#%u F#%u ]", deviceIdx, (int)topology.pcie.bus, (int)topology.pcie.device, (int)topology.pcie.function);
+        context->device_pciBusID = (int)topology.pcie.bus;
+        context->device_pciDeviceID = (int)topology.pcie.device;
+        context->device_pciDomainID = (int)topology.pcie.function;
+
+    }
+    return status;
+}
 
 bool OclCLI::setup(std::vector<xmrig::IThread *> &threads)
 {

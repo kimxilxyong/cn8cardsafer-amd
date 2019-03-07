@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
-project(xmrig-amd)
+project(cn8cs-amd)
 
 option(WITH_AEON      "CryptoNight-Lite support" ON)
 option(WITH_SUMO      "CryptoNight-Heavy support" ON)
 option(WITH_CN_PICO   "CryptoNight-Pico support" ON)
+option(WITH_CN_GPU    "CryptoNight-GPU support" ON)
 option(WITH_HTTPD     "HTTP REST API" ON)
+option(WITH_DEBUG_LOG "Enable debug log output" OFF)
 option(WITH_TLS       "Enable OpenSSL support" ON)
 option(STRICT_CACHE   "Enable strict checks for OpenCL cache" ON)
 option(BUILD_STATIC   "Build static binary" OFF)
-
-option(WITH_DEBUG_LOG            "Enable debug log output, network, etc" OFF)
-option(WITH_INTERLEAVE_DEBUG_LOG "Enable debug log for threads interleave" OFF)
 
 include (CheckIncludeFile)
 include (cmake/cpu.cmake)
@@ -77,6 +76,10 @@ set(HEADERS
     src/workers/OclThread.h
     src/workers/OclWorker.h
     src/workers/Workers.h
+    src/3rdparty/ADL/adl_defines.h
+    src/3rdparty/ADL/adl_sdk.h
+    src/3rdparty/ADL/adl_structures.h
+    src/amd/AdlUtils.h
    )
 
 set(HEADERS_CRYPTO
@@ -138,6 +141,7 @@ set(SOURCES
     src/workers/OclWorker.cpp
     src/workers/Workers.cpp
     src/xmrig.cpp
+    src/amd/AdlUtils.cpp
    )
 
 set(SOURCES_CRYPTO
@@ -223,8 +227,8 @@ if (NOT WITH_SUMO)
     add_definitions(/DXMRIG_NO_SUMO)
 endif()
 
-if (NOT WITH_CN_PICO)
-    add_definitions(/DXMRIG_NO_CN_PICO)
+if (NOT WITH_IPBC)
+    add_definitions(/DXMRIG_NO_IPBC)
 endif()
 
 if (WITH_HTTPD)
@@ -266,9 +270,5 @@ if (WITH_DEBUG_LOG)
     add_definitions(/DAPP_DEBUG)
 endif()
 
-if (WITH_INTERLEAVE_DEBUG_LOG)
-    add_definitions(/DAPP_INTERLEAVE_DEBUG)
-endif()
-
-add_executable(${CMAKE_PROJECT_NAME} ${HEADERS} ${SOURCES} ${SOURCES_OS} ${HEADERS_CRYPTO} ${SOURCES_CRYPTO} ${SOURCES_SYSLOG} ${HTTPD_SOURCES} ${TLS_SOURCES})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${OPENSSL_LIBRARIES} ${UV_LIBRARIES} ${MHD_LIBRARY} ${EXTRA_LIBS} ${LIBS})
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${SOURCES_OS} ${HEADERS_CRYPTO} ${SOURCES_CRYPTO} ${SOURCES_SYSLOG} ${HTTPD_SOURCES} ${TLS_SOURCES})
+target_link_libraries(${PROJECT_NAME} ${OPENSSL_LIBRARIES} ${UV_LIBRARIES} ${MHD_LIBRARY} ${EXTRA_LIBS} ${LIBS})

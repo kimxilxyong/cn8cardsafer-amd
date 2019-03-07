@@ -73,6 +73,8 @@ private:
     uint64_t m_count;
     uint64_t m_sequence;
     uint8_t m_blob[Job::kMaxBlobSize];
+
+    OclThread *m_thread;
 };
 
 

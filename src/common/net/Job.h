@@ -87,7 +87,7 @@ public:
 #   endif
 
     inline bool operator==(const Job &other) const { return isEqual(other); }
-    inline bool operator!=(const Job &other) const { return !isEqual(other); }
+    inline bool operator!=(const Job &other) const { return  !isEqual(other); }
 
 private:
     xmrig::Variant variant() const;

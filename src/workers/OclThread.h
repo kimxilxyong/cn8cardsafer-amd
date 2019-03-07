@@ -51,6 +51,18 @@ public:
     inline void setIntensity(size_t intensity) { m_intensity = intensity; }
     inline void setWorksize(size_t worksize)   { m_worksize = worksize; }
 
+    inline void setCardId(int cardid) { m_cardId = cardid; }
+    inline void setThreadId(int threadid) { m_threadId = threadid; }
+    inline int cardId() const { return m_cardId; }
+    inline int threadId() const { return m_threadId; }
+
+    inline void setPciBusID(uint32_t pciBusID) { m_pciBusID = pciBusID; }
+    inline void setPciDeviceID(uint32_t pciDeviceID) { m_pciDeviceID = pciDeviceID; }
+    inline void setPciDomainID(uint32_t pciDomainID) { m_pciDomainID = pciDomainID; }
+    inline uint32_t pciBusID() const { return m_pciBusID; }
+    inline uint32_t pciDeviceID() const { return m_pciDeviceID; }
+    inline uint32_t pciDomainID() const { return m_pciDomainID; }
+
     inline xmrig::Algo algorithm() const override { return m_algorithm; }
     inline int priority() const override          { return -1; }
     inline int64_t affinity() const override      { return m_affinity; }
@@ -61,6 +73,7 @@ public:
     void setMemChunk(int memChunk);
     void setStridedIndex(int stridedIndex);
     void setUnrollFactor(int unrollFactor);
+
 
 protected:
 #   ifdef APP_DEBUG
@@ -83,6 +96,13 @@ private:
     size_t m_intensity;
     size_t m_worksize;
     xmrig::Algo m_algorithm;
+
+    int m_cardId;
+    int m_threadId;
+
+    uint32_t m_pciBusID;
+    uint32_t m_pciDeviceID;
+    uint32_t m_pciDomainID;
 };
 
 

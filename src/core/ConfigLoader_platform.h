@@ -65,6 +65,9 @@ Options:\n\
       --tls-fingerprint=F      pool TLS certificate fingerprint, if set enable strict certificate pinning\n\
   -r, --retries=N              number of times to retry before switch to backup server (default: 5)\n\
   -R, --retry-pause=N          time to pause between retries (default: 5)\n\
+      --max-gpu-temp=N         Maximum temperature a GPU may reach before its cooled down (default 75)\n\
+      --gpu-temp-falloff=N     Amount of temperature to cool off before mining starts again (default 10)\n\
+      --gpu-fan-level=N        |-1 disabled||0 automatic (default)||1..100 Fan speed in percent|\n\
       --opencl-devices=N       list of OpenCL devices to use.\n\
       --opencl-launch=IxW      list of launch config, intensity and worksize\n\
       --opencl-strided-index=N list of strided_index option values for each thread\n\
@@ -114,6 +117,9 @@ static struct option const options[] = {
     { "background",           0, nullptr, xmrig::IConfig::BackgroundKey     },
     { "config",               1, nullptr, xmrig::IConfig::ConfigKey         },
     { "donate-level",         1, nullptr, xmrig::IConfig::DonateLevelKey    },
+    { "max-gpu-temp",         1, nullptr, xmrig::IConfig::MaxTempKey        },
+    { "gpu-temp-falloff",     1, nullptr, xmrig::IConfig::FalloffKey        },
+    { "gpu-fan-level",        1, nullptr, xmrig::IConfig::FanlevelKey       },
     { "dry-run",              0, nullptr, xmrig::IConfig::DryRunKey         },
     { "help",                 0, nullptr, xmrig::IConfig::HelpKey           },
     { "keepalive",            0, nullptr, xmrig::IConfig::KeepAliveKey      },
@@ -155,6 +161,9 @@ static struct option const config_options[] = {
     { "background",        0, nullptr, xmrig::IConfig::BackgroundKey  },
     { "colors",            0, nullptr, xmrig::IConfig::ColorKey       },
     { "donate-level",      1, nullptr, xmrig::IConfig::DonateLevelKey },
+    { "max-gpu-temp",      1, nullptr, xmrig::IConfig::MaxTempKey     },
+    { "gpu-temp-falloff",  1, nullptr, xmrig::IConfig::FalloffKey     },
+    { "gpu-fan-level",     1, nullptr, xmrig::IConfig::FanlevelKey    },
     { "dry-run",           0, nullptr, xmrig::IConfig::DryRunKey      },
     { "log-file",          1, nullptr, xmrig::IConfig::LogFileKey     },
     { "print-time",        1, nullptr, xmrig::IConfig::PrintTimeKey   },

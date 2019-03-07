@@ -32,6 +32,9 @@
 #include "workers/OclThread.h"
 #include "common/log/Log.h"
 
+#include "amd/GpuContext.h"
+
+
 
 OclThread::OclThread() :
     m_compMode(true),

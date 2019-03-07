@@ -41,9 +41,14 @@
 #include "workers/OclWorker.h"
 #include "workers/Workers.h"
 
+#include "amd/AdlUtils.h"
+
 
 bool Workers::m_active = false;
 bool Workers::m_enabled = true;
+int Workers::m_maxtemp = 75;
+int Workers::m_falloff = 5;
+int Workers::m_fanlevel = 0;
 Hashrate *Workers::m_hashrate = nullptr;
 IJobResultListener *Workers::m_listener = nullptr;
 Job Workers::m_job;
@@ -125,24 +130,74 @@ void Workers::printHashrate(bool detail)
         char num2[8] = { 0 };
         char num3[8] = { 0 };
 
-        Log::i()->text("%s| THREAD | GPU | 10s H/s | 60s H/s | 15m H/s |", isColors ? "\x1B[1;37m" : "");
+        Log::i()->text("%s| THREAD | GPU |     PCI    | TEMP | 10s H/s | 60s H/s | 15m H/s | FAN |", isColors ? "\x1B[1;37m" : "");
+
+        CoolingContext cool;
 
         size_t i = 0;
-        for (const xmrig::IThread *thread : m_controller->config()->threads()) {
-             Log::i()->text("| %6zu | %3zu | %7s | %7s | %7s |",
-                            i, thread->index(),
-                            Hashrate::format(m_hashrate->calc(i, Hashrate::ShortInterval), num1, sizeof num1),
-                            Hashrate::format(m_hashrate->calc(i, Hashrate::MediumInterval), num2, sizeof num2),
-                            Hashrate::format(m_hashrate->calc(i, Hashrate::LargeInterval), num3, sizeof num3)
-                            );
+        for (const xmrig::IThread *t : m_controller->config()->threads()) {
+            auto thread = static_cast<const OclThread *>(t);
+            if (AdlUtils::InitADL(&cool) == true) {
+                cool.Card = thread->cardId();
+                AdlUtils::GetMaxFanRpm(&cool);
+                AdlUtils::Temperature(&cool);
+                AdlUtils::GetFanPercent(&cool, NULL);
 
-             i++;
+                Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.1i%%%  |",
+                    i, thread->cardId(),
+                    thread->pciDomainID(),
+                    thread->pciBusID(),
+                    thread->pciDeviceID(),
+                    cool.CurrentTemp,
+                    Hashrate::format(m_hashrate->calc(i, Hashrate::ShortInterval), num1, sizeof num1),
+                    Hashrate::format(m_hashrate->calc(i, Hashrate::MediumInterval), num2, sizeof num2),
+                    Hashrate::format(m_hashrate->calc(i, Hashrate::LargeInterval), num3, sizeof num3),
+                    cool.CurrentFan
+                );
+
+                i++;
+                AdlUtils::ReleaseADL(&cool);
+            }
+            else {
+                LOG_ERR("Failed to init ADL library");
+            }
         }
     }
 
     m_hashrate->print();
 }
+/*
+void Workers::printHashrate(bool detail)
+{
+    assert(m_controller != nullptr);
+    if (!m_controller) {
+        return;
+    }
 
+    if (detail) {
+        const bool isColors = m_controller->config()->isColors();
+        char num1[8] = { 0 };
+        char num2[8] = { 0 };
+        char num3[8] = { 0 };
+
+        Log::i()->text("%s| THREAD | GPU | 10s H/s | 60s H/s | 15m H/s |", isColors ? "\x1B[1;37m" : "");
+
+        size_t i = 0;
+        for (const xmrig::IThread *thread : m_controller->config()->threads()) {
+            Log::i()->text("| %6zu | %3zu | %7s | %7s | %7s |",
+                i, thread->index(),
+                Hashrate::format(m_hashrate->calc(i, Hashrate::ShortInterval), num1, sizeof num1),
+                Hashrate::format(m_hashrate->calc(i, Hashrate::MediumInterval), num2, sizeof num2),
+                Hashrate::format(m_hashrate->calc(i, Hashrate::LargeInterval), num3, sizeof num3)
+            );
+
+            i++;
+        }
+    }
+
+    m_hashrate->print();
+}
+*/
 
 void Workers::setEnabled(bool enabled)
 {
@@ -159,6 +214,20 @@ void Workers::setEnabled(bool enabled)
     m_sequence++;
 }
 
+void Workers::setMaxtemp(int maxtemp)
+{
+    m_maxtemp = maxtemp;
+}
+
+void Workers::setFalloff(int falloff)
+{
+    m_falloff = falloff;
+}
+
+void Workers::setFanlevel(int fanlevel)
+{
+    m_fanlevel = fanlevel;
+}
 
 void Workers::setJob(const Job &job, bool donate)
 {
@@ -240,9 +309,21 @@ bool Workers::start(xmrig::Controller *controller)
     uint32_t offset = 0;
 
     size_t i = 0;
-    for (xmrig::IThread *thread : threads) {
-        Handle *handle = new Handle(i, thread, &contexts[i], offset, ways);
-        offset += thread->multiway();
+    for (xmrig::IThread *t: threads) {
+        Handle *handle = new Handle(i, t, &contexts[i], offset, ways);
+        offset += t->multiway();
+
+        OclThread *thread = static_cast<OclThread *>(t);
+
+        int CardID = t->index();
+        if (OclCLI::getPCIInfo(&contexts[i], CardID) != CL_SUCCESS) {
+            LOG_ERR("Cannot get PCI information for Card %i", CardID);
+        }
+
+        thread->setPciBusID(contexts[i].device_pciBusID);
+        thread->setPciDeviceID(contexts[i].device_pciDeviceID);
+        thread->setPciDomainID(contexts[i].device_pciDomainID);
+
         i++;
 
         m_workers.push_back(handle);
