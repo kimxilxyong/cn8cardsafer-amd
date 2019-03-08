@@ -47,19 +47,7 @@ public:
     ~OclThread() override;
 
     inline GpuContext *ctx() const  { return m_ctx; }
-
-    inline bool isCompMode() const  { return m_compMode; }
-    inline int memChunk() const     { return m_memChunk; }
-    inline int stridedIndex() const { return m_stridedIndex; }
-    inline int unrollFactor() const { return m_unrollFactor; }
-    inline size_t intensity() const { return m_intensity; }
-    inline size_t worksize() const  { return m_worksize; }
-
-    inline void setAffinity(int64_t affinity)  { m_affinity = affinity; }
-    inline void setCompMode(bool enable)       { m_compMode = enable; }
-    inline void setIndex(size_t index)         { m_index = index; }
-    inline void setIntensity(size_t intensity) { m_intensity = intensity; }
-    inline void setWorksize(size_t worksize)   { m_worksize = worksize; }
+    inline void setAffinity(int64_t affinity) { m_affinity = affinity; }
 
     inline void setCardId(int cardid) { m_cardId = cardid; }
     inline void setThreadId(int threadid) { m_threadId = threadid; }
@@ -97,7 +85,6 @@ public:
     void setThreadsCountByGPU(size_t threads);
     void setUnrollFactor(int unrollFactor);
     void setWorksize(size_t worksize);
-
 
 protected:
 #   ifdef APP_DEBUG

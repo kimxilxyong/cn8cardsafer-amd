@@ -235,7 +235,7 @@ bool  AdlUtils::ReleaseADL(CoolingContext *cool)
 #endif	
 }
 
-bool AdlUtils::Get_DeviceID_by_PCI(CoolingContext *cool, OclThread * thread)
+bool AdlUtils::Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thread)
 {
     int iNumberAdapters = 0;
     bool found = false;

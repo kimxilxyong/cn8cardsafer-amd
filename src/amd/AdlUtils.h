@@ -42,7 +42,7 @@ public:
 	
 	static bool InitADL(CoolingContext *cool);
 	static bool ReleaseADL(CoolingContext *cool);
-    static bool Get_DeviceID_by_PCI(CoolingContext *cool, OclThread * thread);
+    static bool Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thread);
 	static bool Temperature(CoolingContext *cool);
 	static bool TemperatureLinux(CoolingContext *cool);
 	static bool TemperatureWindows(CoolingContext *cool);

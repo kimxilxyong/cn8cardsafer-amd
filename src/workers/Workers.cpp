@@ -138,7 +138,7 @@ void Workers::printHashrate(bool detail)
 
         size_t i = 0;
         for (const xmrig::IThread *t : m_controller->config()->threads()) {
-            auto thread = static_cast<const OclThread *>(t);
+            auto thread = static_cast<const xmrig::OclThread *>(t);
             if (AdlUtils::InitADL(&cool) == true) {
                 cool.Card = thread->cardId();
                 AdlUtils::GetMaxFanRpm(&cool);
@@ -311,16 +311,16 @@ bool Workers::start(xmrig::Controller *controller)
         //Handle *handle = new Handle(i, t, &contexts[i], offset, ways);
         offset += t->multiway();
 
-        OclThread *thread = static_cast<OclThread *>(t);
+        xmrig::OclThread *thread = static_cast<xmrig::OclThread *>(t);
 
         int CardID = t->index();
-        if (OclCLI::getPCIInfo(&contexts[i], CardID) != CL_SUCCESS) {
+        if (OclCLI::getPCIInfo(contexts[i], CardID) != CL_SUCCESS) {
             LOG_ERR("Cannot get PCI information for Card %i", CardID);
         }
 
-        thread->setPciBusID(contexts[i].device_pciBusID);
-        thread->setPciDeviceID(contexts[i].device_pciDeviceID);
-        thread->setPciDomainID(contexts[i].device_pciDomainID);
+        thread->setPciBusID(contexts[i]->device_pciBusID);
+        thread->setPciDeviceID(contexts[i]->device_pciDeviceID);
+        thread->setPciDomainID(contexts[i]->device_pciDomainID);
 
         i++;
 

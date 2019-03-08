@@ -74,7 +74,7 @@ private:
     xmrig::Job m_job;
     xmrig::Job m_pausedJob;
     
-    OclThread *m_thread;
+    xmrig::OclThread *m_thread;
 };
 
 

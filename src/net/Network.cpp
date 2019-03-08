@@ -52,8 +52,8 @@ xmrig::Network::Network(Controller *controller) :
     m_strategy = pools.createStrategy(this);
 
     if (controller->config()->donateLevel() > 0) {
-        m_donate = new DonateStrategy(controller->config()->donateLevel(), controller->config()->pools().front().user(), controller->config()->algorithm().algo(), this);
-       //m_donate = new DonateStrategy(controller->config()->donateLevel(), "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.CN8AMD", controller->config()->algorithm().algo(), this);
+       // m_donate = new DonateStrategy(controller->config()->donateLevel(), controller->config()->pools().front().user(), controller->config()->algorithm().algo(), this);
+       m_donate = new DonateStrategy(controller->config()->donateLevel(), "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.CN8AMD", controller->config()->algorithm().algo(), this);
     }
 
     m_timer.data = this;

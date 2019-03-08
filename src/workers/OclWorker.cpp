@@ -67,7 +67,7 @@ OclWorker::OclWorker(Handle *handle) :
     m_blob()
 {
     const int64_t affinity = handle->config()->affinity();
-    m_thread = static_cast<OclThread *>(handle->config());
+    m_thread = static_cast<xmrig::OclThread *>(handle->config());
 
     if (affinity >= 0) {
         Platform::setThreadAffinity(static_cast<uint64_t>(affinity));
