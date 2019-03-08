@@ -73,6 +73,8 @@ private:
     uint8_t m_blob[xmrig::Job::kMaxBlobSize];
     xmrig::Job m_job;
     xmrig::Job m_pausedJob;
+    
+    OclThread *m_thread;
 };
 
 

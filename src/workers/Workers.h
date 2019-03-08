@@ -64,7 +64,15 @@ public:
     static void setJob(const xmrig::Job &job, bool donate);
     static bool start(xmrig::Controller *controller);
     static void stop();
+
     static void submit(const xmrig::Job &result);
+  
+    static void setMaxtemp(int maxtemp);
+    static void setFalloff(int falloff);
+    static void setFanlevel(int fanlevel);
+    static inline int maxtemp() { return m_maxtemp; }
+    static inline int falloff() { return m_falloff; }
+    static inline int fanlevel() { return m_fanlevel; }
 
     static inline bool isEnabled()                                      { return m_enabled; }
     static inline bool isOutdated(uint64_t sequence)                    { return m_sequence.load(std::memory_order_relaxed) != sequence; }
@@ -73,6 +81,7 @@ public:
     static inline uint64_t sequence()                                   { return m_sequence.load(std::memory_order_relaxed); }
     static inline void pause()                                          { m_active = false; m_paused = 1; m_sequence++; }
     static inline void setListener(xmrig::IJobResultListener *listener) { m_listener = listener; }
+
     static cl_context m_opencl_ctx;
 
 #   ifndef XMRIG_NO_API
@@ -99,6 +108,11 @@ private:
     static uv_rwlock_t m_rwlock;
     static uv_timer_t m_timer;
     static xmrig::Controller *m_controller;
+
+    static int m_maxtemp;
+    static int m_falloff;
+    static int m_fanlevel;
+
     static xmrig::IJobResultListener *m_listener;
     static xmrig::Job m_job;
 };

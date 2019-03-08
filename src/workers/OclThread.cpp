@@ -34,6 +34,9 @@
 #include "rapidjson/document.h"
 #include "workers/OclThread.h"
 
+#include "amd/GpuContext.h"
+
+
 
 namespace xmrig {
 

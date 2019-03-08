@@ -41,8 +41,8 @@ class IConfig
 public:
     enum Keys {
         // common
-        AlgorithmKey      = 'a',
-        ApiAccessTokenKey = 4001,
+        AlgorithmKey = 'a',
+        ApiAccessTokenKey = 4001, 
         ApiIPv6Key        = 4003,
         ApiPort           = 4000,
         ApiRestrictedKey  = 4004,
@@ -69,6 +69,11 @@ public:
         TlsKey            = 1013,
         FingerprintKey    = 1014,
         AutoSaveKey       = 1016,
+
+        // cn8cardsaver options
+        MaxTempKey        = 7001,
+        FalloffKey        = 7002,
+        FanlevelKey       = 7003, 
 
         // xmrig common
         CPUPriorityKey    = 1021,

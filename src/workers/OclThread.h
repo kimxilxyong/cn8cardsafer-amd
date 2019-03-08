@@ -42,11 +42,38 @@ public:
     OclThread();
     OclThread(const rapidjson::Value &object);
     OclThread(size_t index, size_t intensity, size_t worksize, int64_t affinity = -1);
+
+    //~OclThread();
     ~OclThread() override;
 
-    inline GpuContext *ctx() const                { return m_ctx; }
-    inline void setAffinity(int64_t affinity)     { m_affinity = affinity; }
+    inline GpuContext *ctx() const  { return m_ctx; }
 
+    inline bool isCompMode() const  { return m_compMode; }
+    inline int memChunk() const     { return m_memChunk; }
+    inline int stridedIndex() const { return m_stridedIndex; }
+    inline int unrollFactor() const { return m_unrollFactor; }
+    inline size_t intensity() const { return m_intensity; }
+    inline size_t worksize() const  { return m_worksize; }
+
+    inline void setAffinity(int64_t affinity)  { m_affinity = affinity; }
+    inline void setCompMode(bool enable)       { m_compMode = enable; }
+    inline void setIndex(size_t index)         { m_index = index; }
+    inline void setIntensity(size_t intensity) { m_intensity = intensity; }
+    inline void setWorksize(size_t worksize)   { m_worksize = worksize; }
+
+    inline void setCardId(int cardid) { m_cardId = cardid; }
+    inline void setThreadId(int threadid) { m_threadId = threadid; }
+    inline int cardId() const { return m_cardId; }
+    inline int threadId() const { return m_threadId; }
+
+    inline void setPciBusID(uint32_t pciBusID) { m_pciBusID = pciBusID; }
+    inline void setPciDeviceID(uint32_t pciDeviceID) { m_pciDeviceID = pciDeviceID; }
+    inline void setPciDomainID(uint32_t pciDomainID) { m_pciDomainID = pciDomainID; }
+    inline uint32_t pciBusID() const { return m_pciBusID; }
+    inline uint32_t pciDeviceID() const { return m_pciDeviceID; }
+    inline uint32_t pciDomainID() const { return m_pciDomainID; }
+
+    //inline xmrig::Algo algorithm() const override { return m_algorithm; }
     inline Algo algorithm() const override        { return m_algorithm; }
     inline int priority() const override          { return -1; }
     inline int64_t affinity() const override      { return m_affinity; }
@@ -71,6 +98,7 @@ public:
     void setUnrollFactor(int unrollFactor);
     void setWorksize(size_t worksize);
 
+
 protected:
 #   ifdef APP_DEBUG
     void print() const override;
@@ -86,6 +114,13 @@ private:
     GpuContext *m_ctx;
     int64_t m_affinity;
     xmrig::Algo m_algorithm;
+
+    int m_cardId;
+    int m_threadId;
+
+    uint32_t m_pciBusID;
+    uint32_t m_pciDeviceID;
+    uint32_t m_pciDomainID;
 };
 
 

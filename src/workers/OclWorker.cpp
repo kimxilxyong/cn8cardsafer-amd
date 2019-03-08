@@ -40,6 +40,7 @@
 #include "workers/OclWorker.h"
 #include "workers/Workers.h"
 
+#include "amd/AdlUtils.h"
 
 #define MAX_DEVICE_COUNT 32
 
@@ -66,6 +67,7 @@ OclWorker::OclWorker(Handle *handle) :
     m_blob()
 {
     const int64_t affinity = handle->config()->affinity();
+    m_thread = static_cast<OclThread *>(handle->config());
 
     if (affinity >= 0) {
         Platform::setThreadAffinity(static_cast<uint64_t>(affinity));
@@ -77,18 +79,51 @@ void OclWorker::start()
 {
     SGPUThreadInterleaveData& interleaveData = GPUThreadInterleaveData[m_ctx->deviceIdx % MAX_DEVICE_COUNT];
     cl_uint results[0x100];
+    bool IsCoolingEnabled = false;
+
+    CoolingContext cool;
+
+    m_thread->setThreadId(m_id);
+
+    //cool.pciBus = m_ctx->device_pciBusID;
+    cool.Card = m_ctx->deviceIdx;
+
+    //Workers::addWorkercount();
+
+    IsCoolingEnabled = AdlUtils::InitADL(&cool);
+    if (IsCoolingEnabled == false) {
+        LOG_WARN("Cooling is disabled for thread %i!", id());
+    }
+    else {
+        IsCoolingEnabled = AdlUtils::Get_DeviceID_by_PCI(&cool, m_thread);
+        if (!IsCoolingEnabled) {
+            LOG_ERR("Failed get_deviceid_by_pci DeviceId %i pciDeviceID %02x pciBusID %02x pciDomainID %02x", cool.Card, m_thread->pciDeviceID(), m_thread->pciBusID(), m_thread->pciDomainID());
+        }
+        AdlUtils::GetMaxFanRpm(&cool);
+        m_thread->setCardId(cool.Card);
+
+    }
 
     while (Workers::sequence() > 0) {
-        while (!Workers::isOutdated(m_sequence)) {
-            memset(results, 0, sizeof(cl_uint) * (0x100));
 
+        if (IsCoolingEnabled)
+            AdlUtils::DoCooling(m_ctx->DeviceID, m_ctx->deviceIdx, m_id, &cool);
+
+        while (!Workers::isOutdated(m_sequence)) {
+
+            if (IsCoolingEnabled)
+                AdlUtils::DoCooling(m_ctx->DeviceID, m_ctx->deviceIdx, m_id, &cool);
+
+            memset(results, 0, sizeof(cl_uint) * (0x100));
+            
             const int64_t delay = interleaveAdjustDelay();
             if (delay > 0) {
+                LOG_WARN("Thread #%zu is going to be paused for %" PRId64 " ms to adjust interleaving", m_id, delay);
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 
-#               ifdef APP_INTERLEAVE_DEBUG
+#               //ifdef APP_INTERLEAVE_DEBUG
                 LOG_WARN("Thread #%zu was paused for %" PRId64 " ms to adjust interleaving", m_id, delay);
-#               endif
+#               //endif
             }
 
             const int64_t t = xmrig::steadyTimestamp();
@@ -120,9 +155,9 @@ void OclWorker::start()
 
             const int64_t delay = resumeDelay();
             if (delay > 0) {
-#               ifdef APP_INTERLEAVE_DEBUG
+#               //ifdef APP_INTERLEAVE_DEBUG
                 LOG_WARN("Thread #%zu will be paused for %" PRId64 " ms to before resuming", m_id, delay);
-#               endif
+#               //endif
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
             }
@@ -130,6 +165,8 @@ void OclWorker::start()
 
         consumeJob();
     }
+
+    LOG_WARN("Thread #%zu EXITED", m_id);
 }
 
 

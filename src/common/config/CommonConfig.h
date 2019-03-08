@@ -56,6 +56,10 @@ public:
     inline int donateLevel() const                 { return m_donateLevel; }
     inline int printTime() const                   { return m_printTime; }
 
+    inline int maxtemp() const { return m_maxtemp; }
+    inline int falloff() const { return m_falloff; }
+    inline int fanlevel() const { return m_fanlevel; }
+
     inline bool isWatch() const override               { return m_watch && !m_fileName.isNull(); }
     inline const Algorithm &algorithm() const override { return m_algorithm; }
     inline const String &fileName() const override     { return m_fileName; }
@@ -92,6 +96,9 @@ protected:
     bool m_watch;
     int m_apiPort;
     int m_donateLevel;
+    int m_maxtemp;
+    int m_falloff;
+    int m_fanlevel;
     int m_printTime;
     Pools m_pools;
     State m_state;

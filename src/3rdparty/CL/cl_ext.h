@@ -200,6 +200,34 @@ typedef CL_API_ENTRY cl_int (CL_API_CALL *clTerminateContextKHR_fn)(cl_context /
 #define CL_DEVICE_SPIR_VERSIONS                     0x40E0
 #define CL_PROGRAM_BINARY_TYPE_INTERMEDIATE         0x40E1
 
+ /*********************************
+ * cl_amd_device_attribute_query *
+ *********************************/
+#define CL_DEVICE_PROFILING_TIMER_OFFSET_AMD        0x4036
+#define CL_DEVICE_TOPOLOGY_AMD                      0x4037
+#define CL_DEVICE_BOARD_NAME_AMD                    0x4038
+#define CL_DEVICE_GLOBAL_FREE_MEMORY_AMD            0x4039
+#define CL_DEVICE_SIMD_PER_COMPUTE_UNIT_AMD         0x4040
+#define CL_DEVICE_SIMD_WIDTH_AMD                    0x4041
+#define CL_DEVICE_SIMD_INSTRUCTION_WIDTH_AMD        0x4042
+#define CL_DEVICE_WAVEFRONT_WIDTH_AMD               0x4043
+#define CL_DEVICE_GLOBAL_MEM_CHANNELS_AMD           0x4044
+#define CL_DEVICE_GLOBAL_MEM_CHANNEL_BANKS_AMD      0x4045
+#define CL_DEVICE_GLOBAL_MEM_CHANNEL_BANK_WIDTH_AMD 0x4046
+#define CL_DEVICE_LOCAL_MEM_SIZE_PER_COMPUTE_UNIT_AMD   0x4047
+#define CL_DEVICE_LOCAL_MEM_BANKS_AMD               0x4048
+#define CL_DEVICE_THREAD_TRACE_SUPPORTED_AMD        0x4049
+#define CL_DEVICE_GFXIP_MAJOR_AMD                   0x404A
+#define CL_DEVICE_GFXIP_MINOR_AMD                   0x404B
+#define CL_DEVICE_AVAILABLE_ASYNC_QUEUES_AMD        0x404C
+
+typedef union
+{
+    struct { cl_uint type; cl_uint data[5]; } raw;
+    struct { cl_uint type; cl_char unused[17]; cl_char bus; cl_char device; cl_char function; } pcie;
+} cl_device_topology_amd;
+
+#define CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD            1
 
 /*****************************************
  * cl_khr_create_command_queue extension *

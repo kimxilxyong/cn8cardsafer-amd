@@ -119,6 +119,10 @@ int xmrig::App::exec()
     m_httpd->start();
 #   endif
 
+    Workers::setMaxtemp(m_controller->config()->maxtemp());
+    Workers::setFalloff(m_controller->config()->falloff());
+    Workers::setFanlevel(m_controller->config()->fanlevel());
+
     if (Platform::setTimerResolution(1) == 0) {
         LOG_WARN("Failed to set system timer resolution.");
     }
