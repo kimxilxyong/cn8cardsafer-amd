@@ -1,30 +1,30 @@
-# XMRig AMD
+# cn8cardsaver AMD
 
-[![Github All Releases](https://img.shields.io/github/downloads/xmrig/xmrig-amd/total.svg)](https://github.com/xmrig/xmrig-amd/releases)
-[![GitHub release](https://img.shields.io/github/release/xmrig/xmrig-amd/all.svg)](https://github.com/xmrig/xmrig-amd/releases)
-[![GitHub Release Date](https://img.shields.io/github/release-date-pre/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/releases)
-[![GitHub license](https://img.shields.io/github/license/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/blob/master/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/network)
+CN8CardSaver-amd is a high performance CryptoNight OpenCL AMD miner forked from [XMRig-amd](https://github.com/xmrig/xmrig-amd).
 
-XMRig is high performance Monero (XMR) OpenCL miner, with the official full Windows support.
+cn8cardsaver is a miner for CryptoNight coins with GPU temperature and fan control support. With it you can keep your expensive cards cool and save.
+Keep it below 65 C to be on the safe side. If it gets to 80 C or above you are damaging your card.
+Use the switches ```--max-gpu-temp=65 and --gpu-temp-falloff=9``` for example.
 
-GPU mining part based on [Wolf9466](https://github.com/OhGodAPet) and [psychocrypt](https://github.com/psychocrypt) code.
+##### New feature:
+Both linux and windows versiona can now control the fans automatically. If the temperature gets too high the fans are turned to 100% and back to lower speeds if the temperature gets back down. Use --gpu-fan-level=N to control the fan logic. 
+On linux you have to use the amdgpu-pro driver.
 
-* This is the AMD (OpenCL) GPU mining version, there is also a [CPU version](https://github.com/xmrig/xmrig) and [NVIDIA GPU version](https://github.com/xmrig/xmrig-nvidia).
-* [Roadmap](https://github.com/xmrig/xmrig/issues/106) for next releases.
+GPU mining part based on [psychocrypt](https://github.com/psychocrypt) code used in xmr-stak-amd.
 
-:warning: Suggested values for GPU auto configuration can be not optimal or not working, you may need tweak your threads options. Please fell free open an [issue](https://github.com/xmrig/xmrig-amd/issues) if auto configuration suggest wrong values.
-
-<img src="https://xmrig.com/assets/img/screenshots/xmrig-amd-2.8.6.png" width="795" >
+### Temperature control:
+#### Command line options
+```
+      --max-gpu-temp=N      Maximum temperature a GPU may reach before its cooled down (default 75)
+      --gpu-temp-falloff=N  Amount of temperature to cool off before mining starts again (default 10)
+      --gpu-fan-level=N     -1 disabled||0 automatic (default)||1..100 Fan speed in percent\n\
+```
 
 #### Table of contents
 * [Features](#features)
 * [Download](#download)
 * [Usage](#usage)
-* [Build](https://github.com/xmrig/xmrig-amd/wiki/Build)
 * [Donations](#donations)
-* [Release checksums](#release-checksums)
 * [Contacts](#contacts)
 
 ## Features
@@ -33,20 +33,27 @@ GPU mining part based on [Wolf9466](https://github.com/OhGodAPet) and [psychocry
 * Support for backup (failover) mining server.
 * CryptoNight-Lite support for AEON.
 * Automatic GPU configuration.
+* GPU temperature management (option --max-gpu-temp, --gpu-temp-falloff)
 * Nicehash support.
 * It's open source software.
 
 ## Download
-* Binary releases: https://github.com/xmrig/xmrig-amd/releases
-* Git tree: https://github.com/xmrig/xmrig-amd.git
-  * Clone with `git clone https://github.com/xmrig/xmrig-amd.git`  :hammer: [Build instructions](https://github.com/xmrig/xmrig-amd/wiki/Build).
+* Binary releases: https://github.com/kimxilxyong/cn8cardsaver-amd/releases
+* Git tree: https://github.com/kimxilxyong/cn8cardsaver-amd.git
+  * Clone with `git clone https://github.com/kimxilxyong/cn8cardsaver-amd.git`
 
 ## Usage
+
+Example:
+```
+cn8cardsaver-amd.exe --max-gpu-temp=64 --gpu-temp-falloff=7 -o pool.monero.hashvault.pro:5555 -u 422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.Monerogh -p Monero2-amd-gh --variant 2 --nicehash
+```
+
 Use [config.xmrig.com](https://config.xmrig.com/amd) to generate, edit or share configurations.
 
 ### Command line options
 ```
--a, --algo=ALGO              specify the algorithm to use
+  -a, --algo=ALGO              specify the algorithm to use
                                  cryptonight
                                  cryptonight-lite
                                  cryptonight-heavy
@@ -70,6 +77,9 @@ Use [config.xmrig.com](https://config.xmrig.com/amd) to generate, edit or share 
       --opencl-platform=N      OpenCL platform index
       --opencl-loader=N        path to OpenCL-ICD-Loader (OpenCL.dll or libOpenCL.so)
       --print-platforms        print available OpenCL platforms and exit
+      --max-gpu-temp=N         Maximum temperature a GPU may reach before its cooled down (default 75)
+      --gpu-temp-falloff=N     Amount of temperature to cool off before mining starts again (default 10)	  
+      --gpu-fan-level=N        -1 disabled||0 automatic (default)||1..100 Fan speed in percent\n\
       --no-cache               disable OpenCL cache
       --no-color               disable colored output
       --variant                algorithm PoW variant
@@ -91,13 +101,72 @@ Use [config.xmrig.com](https://config.xmrig.com/amd) to generate, edit or share 
   -V, --version                output version information and exit
 ```
 
+
+## Supported algos / coins
+
+```
+    { "cryptonight",           "cn",           xmrig::CRYPTONIGHT,       xmrig::VARIANT_AUTO   },
+    { "cryptonight/0",         "cn/0",         xmrig::CRYPTONIGHT,       xmrig::VARIANT_0      },
+    { "cryptonight/1",         "cn/1",         xmrig::CRYPTONIGHT,       xmrig::VARIANT_1      },
+    { "cryptonight/xtl",       "cn/xtl",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_XTL    },
+    { "cryptonight/msr",       "cn/msr",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_MSR    },
+    { "cryptonight/xao",       "cn/xao",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_XAO    },
+    { "cryptonight/rto",       "cn/rto",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_RTO    },
+    { "cryptonight/2",         "cn/2",         xmrig::CRYPTONIGHT,       xmrig::VARIANT_2      },
+    { "cryptonight/half",      "cn/half",      xmrig::CRYPTONIGHT,       xmrig::VARIANT_HALF   },
+    { "cryptonight/xtlv9",     "cn/xtlv9",     xmrig::CRYPTONIGHT,       xmrig::VARIANT_HALF   },
+    { "cryptonight/wow",       "cn/wow",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_WOW    },
+    { "cryptonight/r",         "cn/r",         xmrig::CRYPTONIGHT,       xmrig::VARIANT_4      },
+    { "cryptonight/rwz",       "cn/rwz",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_RWZ    },
+    { "cryptonight/zls",       "cn/zls",       xmrig::CRYPTONIGHT,       xmrig::VARIANT_ZLS    },
+    { "cryptonight/double",    "cn/double",    xmrig::CRYPTONIGHT,       xmrig::VARIANT_DOUBLE },
+
+#   ifndef XMRIG_NO_AEON
+    { "cryptonight-lite",      "cn-lite",      xmrig::CRYPTONIGHT_LITE,  xmrig::VARIANT_AUTO },
+    { "cryptonight-light",     "cn-light",     xmrig::CRYPTONIGHT_LITE,  xmrig::VARIANT_AUTO },
+    { "cryptonight-lite/0",    "cn-lite/0",    xmrig::CRYPTONIGHT_LITE,  xmrig::VARIANT_0    },
+    { "cryptonight-lite/1",    "cn-lite/1",    xmrig::CRYPTONIGHT_LITE,  xmrig::VARIANT_1    },
+#   endif
+
+#   ifndef XMRIG_NO_SUMO
+    { "cryptonight-heavy",      "cn-heavy",      xmrig::CRYPTONIGHT_HEAVY, xmrig::VARIANT_AUTO },
+    { "cryptonight-heavy/0",    "cn-heavy/0",    xmrig::CRYPTONIGHT_HEAVY, xmrig::VARIANT_0    },
+    { "cryptonight-heavy/xhv",  "cn-heavy/xhv",  xmrig::CRYPTONIGHT_HEAVY, xmrig::VARIANT_XHV  },
+    { "cryptonight-heavy/tube", "cn-heavy/tube", xmrig::CRYPTONIGHT_HEAVY, xmrig::VARIANT_TUBE },
+#   endif
+
+#   ifndef XMRIG_NO_CN_PICO
+    { "cryptonight-pico/trtl",  "cn-pico/trtl",  xmrig::CRYPTONIGHT_PICO, xmrig::VARIANT_TRTL },
+    { "cryptonight-pico",       "cn-pico",       xmrig::CRYPTONIGHT_PICO, xmrig::VARIANT_TRTL },
+    { "cryptonight-turtle",     "cn-trtl",       xmrig::CRYPTONIGHT_PICO, xmrig::VARIANT_TRTL },
+    { "cryptonight-ultralite",  "cn-ultralite",  xmrig::CRYPTONIGHT_PICO, xmrig::VARIANT_TRTL },
+    { "cryptonight_turtle",     "cn_turtle",     xmrig::CRYPTONIGHT_PICO, xmrig::VARIANT_TRTL },
+#   endif
+
+#   ifndef XMRIG_NO_CN_GPU
+    { "cryptonight/gpu",        "cn/gpu",  xmrig::CRYPTONIGHT, xmrig::VARIANT_GPU },
+#   endif
+```
+
+
 ## Donations
 Default donation 5% (5 minutes in 100 minutes) can be reduced to 1% via option `donate-level`.
 
+* XMR: `422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN`
+* BTC: `19hNKKFu34CniRWPhGqAB76vi3U4x7DZyZ`
+
+#### Donate to xmrig dev
 * XMR: `48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD`
 * BTC: `1P7ujsXeX7GxQwHNnJsRMgAdNkFZmNVqJT`
 
+
+## Release checksums (invalid, TBD)
+### SHA-256
+```
+
+```
+
 ## Contacts
-* support@xmrig.com
-* [reddit](https://www.reddit.com/user/XMRig/)
-* [twitter](https://twitter.com/xmrig_dev)
+* kimxilxyong@gmail.com
+* [reddit](https://www.reddit.com/user/kimilyong/)
+
