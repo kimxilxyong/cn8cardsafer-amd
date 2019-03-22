@@ -14,7 +14,7 @@ Keep it below 65 C to be on the safe side. If it gets to 80 C or above you could
 Use the switches ```--max-gpu-temp=65 and --gpu-temp-falloff=9``` for example.
 
 ##### New feature:
-Both linux and windows versiona can now control the fans automatically. If the temperature gets too high the fans are turned to 100% and back to lower speeds if the temperature gets back down. Use --gpu-fan-level=N to control the fan logic. 
+Both linux and windows versions can now control the gpu fans automatically. If the temperature gets too high the fans are turned to 100% and back to lower speeds if the temperature gets back down. Use --gpu-fan-level=N to control the fan logic. 
 On linux you have to use the amdgpu-pro driver.
 
 GPU mining part based on [psychocrypt](https://github.com/psychocrypt) code used in xmr-stak-amd.
