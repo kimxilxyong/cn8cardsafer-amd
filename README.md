@@ -1,5 +1,12 @@
 # cn8cardsaver AMD
 
+[![Github All Releases](https://img.shields.io/github/downloads/kimxilxyong/cn8cardsafer-amd/total.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/releases)
+[![GitHub release](https://img.shields.io/github/release/kimxilxyong/cn8cardsafer-amd/all.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/releases)
+[![GitHub Release Date](https://img.shields.io/github/release-date-pre/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/releases)
+[![GitHub license](https://img.shields.io/github/license/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/network)
+
 CN8CardSaver-amd is a high performance CryptoNight OpenCL AMD miner forked from [XMRig-amd](https://github.com/xmrig/xmrig-amd).
 
 cn8cardsaver is a miner for CryptoNight coins with GPU temperature and fan control support. With it you can keep your expensive cards cool and save.
