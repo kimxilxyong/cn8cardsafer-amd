@@ -111,7 +111,7 @@ Use [config.xmrig.com](https://config.xmrig.com/amd) to generate, edit or share 
 ```
 
 
-## Supported algos / coins
+## Supported algorithms / coins
 
 ```
     { "cryptonight",           "cn",           xmrig::CRYPTONIGHT,       xmrig::VARIANT_AUTO   },
