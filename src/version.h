@@ -28,15 +28,16 @@
 #define APP_ID        "cn8cardsaver-amd"
 #define APP_NAME      "CN8CardSaver-AMD"
 #define APP_DESC      "CN8CS OpenCL miner"
-#define APP_VERSION   "1.0.6"
+#define APP_VERSION   "1.1.0"
 #define APP_DOMAIN    "cn8cardsaver.com"
 #define APP_SITE      "www.cn8cardsaver.com"
 #define APP_COPYRIGHT "Copyright (C) 2019 cn8cardsaver.com"
 #define APP_KIND      "amd"
 
 #define APP_VER_MAJOR  1
-#define APP_VER_MINOR  0
-#define APP_VER_PATCH  6
+#define APP_VER_MINOR  1
+#define APP_VER_PATCH  0
+
 
 #ifdef _MSC_VER
 #   if (_MSC_VER >= 1910)
