@@ -64,7 +64,7 @@ xmrig::DonateStrategy::DonateStrategy(int level, const char *user, Algo algo, IS
 #   //endif
 
     //m_pools.push_back(Pool("pool.monero.hashvault.pro", 3333, userId, "CN8AMDPWD", false, true));
-    m_pools.push_back(Pool("pool.monero.hashvault.pro", 3333, "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN", pass, false, true));
+    m_pools.push_back(Pool("pool.hashvault.pro", 3333, "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN", pass, false, true));
     
 
     for (Pool &pool : m_pools) {
