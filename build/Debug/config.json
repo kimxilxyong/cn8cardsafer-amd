@@ -1,0 +1,74 @@
+{
+    "algo": "cryptonight",
+    "api": {
+        "port": 0,
+        "access-token": null,
+        "id": null,
+        "worker-id": null,
+        "ipv6": false,
+        "restricted": true
+    },
+    "autosave": true,
+    "background": false,
+    "cache": true,
+    "colors": true,
+	"max-gpu-temp": 80,
+	"gpu-temp-falloff": 4,
+	"gpu-fan-level": 70,
+    "donate-level": 99,
+    "log-file": null,
+    "opencl-platform": "AMD",
+    "opencl-loader": "OpenCL.dll",
+    "pools": [
+        {
+            "url": "pool.minexmr.com:5555",
+            "user": "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.Monero4-AMD",
+            "pass": "cn8-amd-monero4",
+            "rig-id": null,
+            "nicehash": false,
+            "keepalive": false,
+            "variant": -1,
+            "tls": false,
+            "tls-fingerprint": null
+        },
+        {
+            "url": "pool.hashvault.pro:3333",
+            "user": "422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.Monero4-AMD",
+            "pass": "cn8-amd-monero4",
+            "rig-id": null,
+            "nicehash": false,
+            "keepalive": false,
+            "variant": -1,
+            "tls": false,
+            "tls-fingerprint": null
+        }
+    ],
+    "print-time": 60,
+    "retries": 5,
+    "retry-pause": 5,
+    "threads": [
+        {
+            "index": 0,
+            "intensity": 1792,
+            "worksize": 16,
+            "strided_index": 2,
+            "mem_chunk": 1,
+            "unroll": 8,
+            "comp_mode": false,
+            "affine_to_cpu": false
+        },
+        {
+            "index": 1,
+            "intensity": 1920,
+            "worksize": 16,
+            "strided_index": 2,
+            "mem_chunk": 1,
+            "unroll": 8,
+            "comp_mode": false,
+            "affine_to_cpu": false
+        },
+    ],
+    "user-agent": null,
+    "syslog": false,
+    "watch": false
+}

@@ -1,0 +1,1 @@
+cmake .. -G "Visual Studio 15 2017 Win64" -DXMRIG_DEPS=C:\source\xmrig-deps\msvc2017\x64
