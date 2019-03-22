@@ -11,7 +11,7 @@ CN8CardSaver-amd is a high performance CryptoNight OpenCL AMD miner forked from 
 
 cn8cardsaver is a miner for CryptoNight coins with GPU temperature and fan control support. With it you can keep your expensive cards cool and save.
 Keep it below 65 C to be on the safe side. If it gets to 80 C or above you could be damaging your card.
-Use the switches ```--max-gpu-temp=65 and --gpu-temp-falloff=9``` for example.
+Use the switches ```--max-gpu-temp=65 and --gpu-temp-falloff=9``` for example to reduce the GPU load.
 
 ##### New feature:
 Both linux and windows versions can now control the gpu fans automatically. If the temperature gets too high the fans are turned to 100% and back to lower speeds if the temperature gets back down. Use --gpu-fan-level=N to control the fan logic. 
