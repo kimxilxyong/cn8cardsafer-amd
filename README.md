@@ -3,9 +3,9 @@
 [![Github All Releases](https://img.shields.io/github/downloads/kimxilxyong/cn8cardsafer-amd/total.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/releases)
 ![version](https://img.shields.io/badge/version-1.1.0-blue.svg?cacheSeconds=2592000)
 [![GitHub Release Date](https://img.shields.io/github/release-date-pre/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/releases)
-[![GitHub license](https://img.shields.io/github/license/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/blob/master/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/xmrig/xmrig-amd.svg)](https://github.com/xmrig/xmrig-amd/network)
+[![GitHub license](https://img.shields.io/github/license/kimxilxyong/cn8cardsafer-amd.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/kimxilxyong/cn8cardsafer-amd.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/kimxilxyong/cn8cardsafer-amd.svg)](https://github.com/kimxilxyong/cn8cardsafer-amd/network)
 
 CN8CardSaver-amd is a high performance CryptoNight OpenCL AMD miner forked from [XMRig-amd](https://github.com/xmrig/xmrig-amd).
 
