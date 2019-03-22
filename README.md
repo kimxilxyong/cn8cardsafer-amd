@@ -33,14 +33,16 @@ GPU mining part based on [psychocrypt](https://github.com/psychocrypt) code used
 * [Usage](#usage)
 * [Donations](#donations)
 * [Contacts](#contacts)
+* [Build](https://github.com/xmrig/xmrig-amd/wiki/Build)
 
 ## Features
 * High performance.
 * Official Windows support.
 * Support for backup (failover) mining server.
-* CryptoNight-Lite support for AEON.
+* Most CryptoNight coins supported
 * Automatic GPU configuration.
 * GPU temperature management (option --max-gpu-temp, --gpu-temp-falloff)
+* GPU fan control (option --gpu-fan-level)
 * Nicehash support.
 * It's open source software.
 
@@ -53,7 +55,7 @@ GPU mining part based on [psychocrypt](https://github.com/psychocrypt) code used
 
 Example:
 ```
-cn8cardsaver-amd.exe --max-gpu-temp=64 --gpu-temp-falloff=7 -o pool.monero.hashvault.pro:5555 -u 422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.Monerogh -p Monero2-amd-gh --variant 2 --nicehash
+cn8cardsaver-amd.exe --max-gpu-temp=74 --gpu-temp-falloff=7 -o pool.hashvault.pro:5555 -u 422KmQPiuCE7GdaAuvGxyYScin46HgBWMQo4qcRpcY88855aeJrNYWd3ZqE4BKwjhA2BJwQY7T2p6CUmvwvabs8vQqZAzLN.Monero1 -p Monero1-amd-gh
 ```
 
 Use [config.xmrig.com](https://config.xmrig.com/amd) to generate, edit or share configurations.
