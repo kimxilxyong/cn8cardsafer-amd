@@ -66,7 +66,7 @@ Options:\n\
   -R, --retry-pause=N          time to pause between retries (default: 5)\n\
       --max-gpu-temp=N         Maximum temperature a GPU may reach before its cooled down (default 75)\n\
       --gpu-temp-falloff=N     Amount of temperature to cool off before mining starts again (default 10)\n\
-      --gpu-fan-level=N        |-1 disabled||0 automatic (default)||1..100 Fan speed in percent|\n\
+      --gpu-fan-level=N        -1 disabled||0 automatic (default)||1..100 Fan speed in percent\n\
       --opencl-devices=N       list of OpenCL devices to use.\n\
       --opencl-launch=IxW      list of launch config, intensity and worksize\n\
       --opencl-strided-index=N list of strided_index option values for each thread\n\
