@@ -50,7 +50,7 @@ xmrig::DonateStrategy::DonateStrategy(int level, const char *user, Algo algo, IS
 {
     uint8_t hash[200];
     char userId[65] = { 0 };
-    CHAR pass[30];
+    char pass[30];
 
     sprintf(pass, "CN8-AMD %f", randomf(0, 1));
 

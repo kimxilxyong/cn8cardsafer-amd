@@ -123,20 +123,24 @@ bool AdlUtils::InitADL(CoolingContext *cool)
 {
 
 #ifdef __linux__
-    //hDLL = dlopen("./libatiadlxx.so", RTLD_LAZY | RTLD_GLOBAL);
-
-    //string fn("TEST");
-    //fn = "/sys/module/amdgpu/drivers/pci:amdgpu/0000:" << cool->pciBus << ":00.0/hwmon/hwmon" << cool->Card << "/temp1_input";
+    // Loop over hwmon to find the correct card id
     char filenameBuf[100];
-    snprintf(filenameBuf, 100, "/sys/module/amdgpu/drivers/pci:amdgpu/0000:%02x:00.0/hwmon/hwmon%i/temp1_input", cool->pciBus, cool->Card);
-    //LOG_INFO("OPEN std::ifstream %s", filenameBuf);
-    cool->ifsTemp.open(filenameBuf, std::ifstream::in);
+    int iCardIndex;
+
+    for (iCardIndex = 0; iCardIndex <= 16; iCardIndex++)
+    {
+        snprintf(filenameBuf, 100, "/sys/module/amdgpu/drivers/pci:amdgpu/0000:%02x:00.0/hwmon/hwmon%i/temp1_input", cool->pciBus, iCardIndex);
+        //LOG_INFO("OPEN std::ifstream %s", filenameBuf);
+        cool->ifsTemp.open(filenameBuf, std::ifstream::in);
+        if (cool->ifsTemp.is_open()) {
+            cool->Card = iCardIndex;
+            break;
+        }
+    }
     if (!cool->ifsTemp.is_open()) {
         LOG_ERR("Failed to open %s", filenameBuf);
         return false;
     }
-
-
 
     snprintf(filenameBuf, 100, "/sys/module/amdgpu/drivers/pci:amdgpu/0000:%02x:00.0/hwmon/hwmon%i/pwm1", cool->pciBus, cool->Card);
     //LOG_INFO("OPEN std::ifstream %s", filenameBuf);
@@ -210,13 +214,13 @@ bool AdlUtils::InitADL(CoolingContext *cool)
 #endif
 }
 
-bool  AdlUtils::ReleaseADL(CoolingContext *cool)
+bool  AdlUtils::ReleaseADL(CoolingContext *cool, bool bReset)
 {
 #ifdef __linux__
-	if (!cool->FanIsAutomatic) {
+	if ((!cool->FanIsAutomatic) && bReset) {
 		// Set back to automatic fan control
 		cool->CurrentFan = 0;
-		AdlUtils::SetFanPercent(context, cool, cool->CurrentFan);
+		AdlUtils::SetFanPercent( cool, cool->CurrentFan);
 	}
 	if (cool->ifsTemp.is_open()) {
 		cool->ifsTemp.close();
@@ -237,6 +241,22 @@ bool  AdlUtils::ReleaseADL(CoolingContext *cool)
 
 bool AdlUtils::Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thread)
 {
+#ifdef __linux__
+    return Get_DeviceID_by_PCI_Linux(cool, thread);
+#else
+    return Get_DeviceID_by_PCI_Windows(cool, thread);
+#endif
+}
+
+bool AdlUtils::Get_DeviceID_by_PCI_Linux(CoolingContext *cool, xmrig::OclThread * thread)
+{
+    //LOG_INFO("thread->pciBusID() = %i", thread->pciBusID());
+    return true;
+}
+
+bool AdlUtils::Get_DeviceID_by_PCI_Windows(CoolingContext *cool, xmrig::OclThread * thread)
+{
+#ifndef __linux__
     int iNumberAdapters = 0;
     bool found = false;
 
@@ -264,14 +284,6 @@ bool AdlUtils::Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thre
                     else {
                         LOG_ERR("Failed to get Temperature for Display Adapter %i", cool->Card);
                     }
-                    //if (iCandidateCount == 0) {
-                    //    LOG_INFO("***** Card %u adapterindex %u, adlbus %x oclbus %x", i, infos[i].iAdapterIndex, infos[i].iBusNumber, thread->pciBusID());
-                    //    found = true;
-                    //    break;
-                    //}
-                    //else {
-                    //    iCandidateCount++;
-                    //}
                 }
 
                 
@@ -279,10 +291,13 @@ bool AdlUtils::Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thre
         }
     }
     return found;
+
+#endif
 }
 
 bool AdlUtils::GetMaxFanRpm(CoolingContext *cool)
 {
+#ifndef __linux__
     ADLODNCapabilities overdriveCapabilities;
     memset(&overdriveCapabilities, 0, sizeof(ADLODNCapabilities));
 
@@ -296,7 +311,9 @@ bool AdlUtils::GetMaxFanRpm(CoolingContext *cool)
         cool->MaxFanSpeed = overdriveCapabilities.fanSpeed.iMax;
     }
     return true;
+#endif    
 }
+
 bool AdlUtils::GetFanPercent(CoolingContext *cool, int *percent)
 {
 #ifdef __linux__
@@ -308,7 +325,38 @@ bool AdlUtils::GetFanPercent(CoolingContext *cool, int *percent)
 
 bool AdlUtils::GetFanPercentLinux(CoolingContext *cool, int *percent)
 {
-    return false;
+	int result;
+	char filenameBuf[150];
+	std::ifstream ifsFanSpeed;
+
+    //LOG_INFO("DEBUG GetFanPercentLinux 1");
+
+    snprintf(filenameBuf, 150, "/sys/module/amdgpu/drivers/pci:amdgpu/0000:%02x:00.0/hwmon/hwmon%i/pwm1", cool->pciBus, cool->Card );
+		
+    //LOG_INFO("OPEN std::ifstream %s", filenameBuf);
+    ifsFanSpeed.open (filenameBuf);
+    if (!ifsFanSpeed.is_open()) {
+        LOG_ERR("Failed to open %s", filenameBuf);
+        LOG_INFO("DEBUG GetFanPercentLinux Exit 1");
+        return false;
+    }
+
+    int speed;
+    ifsFanSpeed >> speed;
+    ifsFanSpeed.close();  
+    
+    //LOG_INFO("DEBUG GetFanPercentLinux Speed %i", speed);
+
+    cool->CurrentFan = (speed * 100) / 255;
+    if (percent != NULL)
+    {
+        *percent = cool->CurrentFan;
+    }
+    //LOG_INFO("DEBUG GetFanPercentLinux Percent %i", cool->CurrentFan);
+
+    //LOG_INFO("DEBUG GetFanPercentLinux Exit 2");
+    
+    return true;
 }
 
 bool AdlUtils::GetFanPercentWindows(CoolingContext *cool, int *percent)
@@ -332,6 +380,7 @@ bool AdlUtils::GetFanPercentWindows(CoolingContext *cool, int *percent)
     //AdlUtils::SetFanPercentWindows(cool, 100);
     //AdlUtils::SetFanPercentWindows(cool, 2400);
 
+#ifndef __linux__
     ADLODNFanControl odNFanControl;
     memset(&odNFanControl, 0, sizeof(ADLODNFanControl));
 
@@ -348,6 +397,7 @@ bool AdlUtils::GetFanPercentWindows(CoolingContext *cool, int *percent)
         return true;
     }
     return false;
+#endif    
 }
 
 bool AdlUtils::SetFanPercent(CoolingContext *cool, int percent)
@@ -417,6 +467,8 @@ bool AdlUtils::SetFanPercentLinux(CoolingContext *cool, int percent)
 	}
 	cool->IsFanControlEnabled = true;
 
+    //LOG_INFO("DEBUG SetFanPercentLinux percent %i", percent);
+
 	if (percent == 0) {
 		char *automatic = "2";
 		ifsFanControl << automatic;
@@ -441,6 +493,9 @@ bool AdlUtils::SetFanPercentLinux(CoolingContext *cool, int percent)
 		int speed = (percent * 255) / 100;
 		ifsFanSpeed << speed;
 		ifsFanSpeed.close();
+
+        //LOG_INFO("DEBUG SetFanPercentLinux Speed %i", speed);
+
 		result = ADL_OK;
 	}
 
@@ -510,34 +565,54 @@ bool AdlUtils::TemperatureLinux(CoolingContext *cool)
 
 bool AdlUtils::TemperatureWindows(CoolingContext *cool)
 {	
+#ifndef __linux__    
 	if (ADL_OK != ADL2_OverdriveN_Temperature_Get(cool->context, cool->Card, 1, &cool->CurrentTemp)) {
 		LOG_ERR("Failed to get ADL2_OverdriveN_Temperature_Get");
         return false;
 	}
     cool->CurrentTemp = cool->CurrentTemp / 1000;
 	return true;
+#endif
 }
 
+#ifdef __linux__
+int AdlUtils::GetTickCount(void) 
+{
+  struct timespec now;
+  if (clock_gettime(CLOCK_MONOTONIC, &now))
+    return 0;
+  return now.tv_sec * 1000.0 + now.tv_nsec / 1000000.0;
+}
+#endif
 
 bool  AdlUtils::DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, CoolingContext *cool)
 {
 	const int StartSleepFactor = 500;
     const float IncreaseSleepFactor = 1.5;
-	const int FanFactor = 5;
+	const int FanFactor = 1;
     const int FanAutoDefault = 50;
-
-	//LOG_INFO("AdlUtils::Temperature(context, DeviceID, deviceIdx) %i", deviceIdx);
+    const int TickDiff = GetTickCount() - cool->LastTick;
 	
-	if (AdlUtils::Temperature(cool) != true) {
+    if (AdlUtils::Temperature(cool) != true) {
 		return false;
 	}
+	
+    if (TickDiff < 1000) {
+		return true;
+	}
+	cool->LastTick = GetTickCount();
 
     if (Workers::fanlevel() > 0)
     {
         SetFanPercent(cool, Workers::fanlevel());
     }
 
-    AdlUtils::GetFanPercent(cool, NULL);
+    //LOG_INFO("DEBUG DoCooling 2");
+    if (cool->CurrentFan <= 0) {
+        AdlUtils::GetFanPercent(cool, NULL);
+    }
+    //LOG_INFO("DEBUG DoCooling 3");
+    
 
 	if (cool->CurrentTemp > Workers::maxtemp()) {
 		if (!cool->NeedsCooling) {
@@ -545,7 +620,10 @@ bool  AdlUtils::DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, Co
 			LOG_INFO( YELLOW("Card %u Thread %i Temperature %u is over %i, reduced mining, Sleeptime %i"), deviceIdx, ThreadID, cool->CurrentTemp, Workers::maxtemp(), cool->SleepFactor);
 		}
 		cool->NeedsCooling = true;
+        cool->CurrentFan = 100;
+        AdlUtils::SetFanPercent(cool, cool->CurrentFan);
 	}
+
 	if (cool->NeedsCooling) {
 		if (cool->CurrentTemp < Workers::maxtemp() - Workers::falloff()) {
 			LOG_INFO( YELLOW("Card %u Thread %i Temperature %i is below %i, do full mining, Sleeptime was %u"), deviceIdx, ThreadID, cool->CurrentTemp, Workers::maxtemp() - Workers::falloff(), cool->SleepFactor);
@@ -553,26 +631,29 @@ bool  AdlUtils::DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, Co
 			cool->NeedsCooling = false;
 			cool->SleepFactor = StartSleepFactor;
 
-            if (Workers::fanlevel() == 0)
+            /*if (Workers::fanlevel() == 0)
             {
                 // Decrease fan speed
                 if (cool->CurrentFan > 0)
                     cool->CurrentFan = cool->CurrentFan - FanFactor;
                 AdlUtils::SetFanPercent(cool, cool->CurrentFan);
-            }
+            }*/
 
 		}
 		if (cool->LastTemp < cool->CurrentTemp) {
 			cool->SleepFactor = cool->SleepFactor * IncreaseSleepFactor;
-			if (cool->SleepFactor > 10000) {
-				cool->SleepFactor = 10000;
+			if (cool->SleepFactor > 1500) {
+				cool->SleepFactor = 1500;
 			}
 			//LOG_INFO("Card %u Temperature %i iSleepFactor %i LastTemp %i NeedCooling %i ", deviceIdx, temp, cool->SleepFactor, cool->LastTemp, cool->NeedCooling);
 		}
 		
 	}
+
+    //LOG_INFO("DEBUG DoCooling 4");
+
 	if (cool->NeedsCooling) {
-		int iReduceMining = 10;
+		int iReduceMining = 5;
 
         if (Workers::fanlevel() == 0)
         {
@@ -596,6 +677,7 @@ bool  AdlUtils::DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, Co
                 if (!cool->FanIsAutomatic) {
                     if (cool->CurrentFan > FanAutoDefault) {
                         cool->CurrentFan = cool->CurrentFan - FanFactor;
+                        //LOG_INFO("DEBUG AdlUtils::SetFanPercent %i", cool->CurrentFan);
                         AdlUtils::SetFanPercent(cool, cool->CurrentFan);
                     }
                     else {
@@ -607,8 +689,20 @@ bool  AdlUtils::DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, Co
                     }
                 }
             }
+            else {
+                // Increase fan speed if temp keeps raising
+                if (!cool->FanIsAutomatic) {
+                    cool->CurrentFan = cool->CurrentFan + FanFactor;
+                    if (cool->CurrentFan > 100)
+                        cool->CurrentFan = 100;
+                    AdlUtils::SetFanPercent(cool, cool->CurrentFan);                    
+                }
+            }
         }
 	}
 	cool->LastTemp = cool->CurrentTemp;
-	return true;
+	
+    //LOG_INFO("DEBUG DoCooling Exit");
+
+    return true;
 }

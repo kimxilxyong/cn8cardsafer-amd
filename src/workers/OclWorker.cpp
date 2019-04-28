@@ -38,6 +38,7 @@
 #include "workers/Handle.h"
 #include "workers/OclThread.h"
 #include "workers/OclWorker.h"
+#include "amd/OclCache.h"
 #include "workers/Workers.h"
 
 #include "amd/AdlUtils.h"
@@ -85,10 +86,14 @@ void OclWorker::start()
 
     m_thread->setThreadId(m_id);
 
-    //cool.pciBus = m_ctx->device_pciBusID;
+    cool.pciBus = m_ctx->device_pciBusID;
     cool.Card = m_ctx->deviceIdx;
 
     //Workers::addWorkercount();
+
+    OclCache::sleep(50000);
+    
+    //LOG_INFO("m_thread->pciBusID() = %x, cool.pciBus = %x, m_thread->cardId = %i, cool.Card = %i", m_thread->pciBusID(), cool.pciBus, m_thread->cardId(), cool.Card);
 
     IsCoolingEnabled = AdlUtils::InitADL(&cool);
     if (IsCoolingEnabled == false) {
@@ -103,27 +108,36 @@ void OclWorker::start()
         m_thread->setCardId(cool.Card);
 
     }
+    //LOG_INFO("DEBUG 1");
 
     while (Workers::sequence() > 0) {
 
         if (IsCoolingEnabled)
             AdlUtils::DoCooling(m_ctx->DeviceID, m_ctx->deviceIdx, m_id, &cool);
 
+        //LOG_INFO("DEBUG 2");
+
         while (!Workers::isOutdated(m_sequence)) {
+
+            //LOG_INFO("DEBUG 3");
 
             if (IsCoolingEnabled)
                 AdlUtils::DoCooling(m_ctx->DeviceID, m_ctx->deviceIdx, m_id, &cool);
 
             memset(results, 0, sizeof(cl_uint) * (0x100));
             
+            //LOG_INFO("DEBUG 4");
+
             const int64_t delay = interleaveAdjustDelay();
             if (delay > 0) {
+#               ifdef APP_INTERLEAVE_DEBUG                
                 LOG_WARN("Thread #%zu is going to be paused for %" PRId64 " ms to adjust interleaving", m_id, delay);
+#               endif                
                 std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 
-#               //ifdef APP_INTERLEAVE_DEBUG
+#               ifdef APP_INTERLEAVE_DEBUG
                 LOG_WARN("Thread #%zu was paused for %" PRId64 " ms to adjust interleaving", m_id, delay);
-#               //endif
+#               endif
             }
 
             const int64_t t = xmrig::steadyTimestamp();
@@ -165,7 +179,7 @@ void OclWorker::start()
 
         consumeJob();
     }
-
+    AdlUtils::ReleaseADL(&cool, true);
     LOG_WARN("Thread #%zu EXITED", m_id);
 }
 

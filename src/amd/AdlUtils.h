@@ -19,6 +19,7 @@
 typedef struct _CoolingContext {
 	int SleepFactor = 0;
 	int LastTemp = 0;
+	int LastTick = 0;
 	int CurrentTemp = 0;
 	int CurrentFan = 0;
 	bool NeedsCooling = false;
@@ -41,8 +42,10 @@ class AdlUtils
 public:
 	
 	static bool InitADL(CoolingContext *cool);
-	static bool ReleaseADL(CoolingContext *cool);
+	static bool ReleaseADL(CoolingContext *cool, bool bReset);
     static bool Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thread);
+	static bool Get_DeviceID_by_PCI_Linux(CoolingContext *cool, xmrig::OclThread * thread);
+	static bool Get_DeviceID_by_PCI_Windows(CoolingContext *cool, xmrig::OclThread * thread);
 	static bool Temperature(CoolingContext *cool);
 	static bool TemperatureLinux(CoolingContext *cool);
 	static bool TemperatureWindows(CoolingContext *cool);
@@ -55,7 +58,10 @@ public:
 	static bool DoCooling(cl_device_id DeviceID, int deviceIdx, int ThreadID, CoolingContext *cool);
 
     static bool GetMaxFanRpm(CoolingContext *cool);
-
+	
+	#ifdef __linux__
+    static int GetTickCount(void);
+    #endif
 };
 
 

@@ -132,20 +132,28 @@ void Workers::printHashrate(bool detail)
         char num2[8] = { 0 };
         char num3[8] = { 0 };
 
-        Log::i()->text("%s| THREAD | GPU |     PCI    | TEMP | 10s H/s | 60s H/s | 15m H/s | FAN |", isColors ? "\x1B[1;37m" : "");
+        Log::i()->text("%s| THREAD | GPU |     PCI    | TEMP | 10s H/s | 60s H/s | 15m H/s |  FAN |", isColors ? "\x1B[1;37m" : "");
 
         CoolingContext cool;
 
         size_t i = 0;
         for (const xmrig::IThread *t : m_controller->config()->threads()) {
             auto thread = static_cast<const xmrig::OclThread *>(t);
+#ifdef __linux__
+            cool.pciBus = thread->pciBusID();
+#endif            
             if (AdlUtils::InitADL(&cool) == true) {
+#ifndef __linux__                
                 cool.Card = thread->cardId();
+#endif                
                 AdlUtils::GetMaxFanRpm(&cool);
-                AdlUtils::Temperature(&cool);
+                AdlUtils::Temperature(&cool);                
                 AdlUtils::GetFanPercent(&cool, NULL);
 
-                Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.1i%%%  |",
+                //LOG_INFO("DEBUG printHashrate Speed %i", percent);
+
+                //Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.1i%%%  |",
+                Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.li%% |",
                     i, thread->cardId(),
                     thread->pciDomainID(),
                     thread->pciBusID(),
@@ -158,7 +166,7 @@ void Workers::printHashrate(bool detail)
                 );
 
                 i++;
-                AdlUtils::ReleaseADL(&cool);
+                AdlUtils::ReleaseADL(&cool, false);
             }
             else {
                 LOG_ERR("Failed to init ADL library");
