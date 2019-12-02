@@ -60,6 +60,7 @@ public:
     static size_t hugePages();
     static size_t threads();
     static void printHashrate(bool detail);
+    static void printHealth();
     static void setEnabled(bool enabled);
     static void setJob(const xmrig::Job &job, bool donate);
     static bool start(xmrig::Controller *controller);

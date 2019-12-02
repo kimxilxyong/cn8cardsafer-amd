@@ -27,6 +27,7 @@
 
 
 #include "amd/OclGPU.h"
+#include "amd/OclLib.h"
 #include "api/Api.h"
 #include "common/log/Log.h"
 #include "core/Config.h"
@@ -132,50 +133,168 @@ void Workers::printHashrate(bool detail)
         char num2[8] = { 0 };
         char num3[8] = { 0 };
 
-        Log::i()->text("%s| THREAD | GPU |     PCI    | TEMP | 10s H/s | 60s H/s | 15m H/s |  FAN |", isColors ? "\x1B[1;37m" : "");
-
-        CoolingContext cool;
+        LOG_INFO(" THREAD | GPU |     PCI    | 10s H/s | 60s H/s | 15m H/s | TEMP |  FAN |", isColors ? "\x1B[1;37m" : "");
+        
 
         size_t i = 0;
         for (const xmrig::IThread *t : m_controller->config()->threads()) {
             auto thread = static_cast<const xmrig::OclThread *>(t);
-#ifdef __linux__
-            cool.pciBus = thread->pciBusID();
-#endif            
-            if (AdlUtils::InitADL(&cool) == true) {
-#ifndef __linux__                
-                cool.Card = thread->cardId();
-#endif                
-                AdlUtils::GetMaxFanRpm(&cool);
-                AdlUtils::Temperature(&cool);                
-                AdlUtils::GetFanPercent(&cool, NULL);
+            CoolingContext *cool = thread->cool();
+                
+                //LOG_DEBUG("Cool=%i", cool);
+
+                AdlUtils::GetMaxFanRpm(cool);
+                AdlUtils::Temperature(cool);                
+                AdlUtils::GetFanPercent(cool, NULL);
 
                 //LOG_INFO("DEBUG printHashrate Speed %i", percent);
 
                 //Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.1i%%%  |",
-                Log::i()->text("| %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %3u  | %7s | %7s | %7s | %3.li%% |",
+                LOG_INFO(" %6zu | %3zu | " YELLOW("%04x:%02x:%02x") " | %7s | %7s | %7s | %3u  | %3.li%% |",
                     i, thread->cardId(),
                     thread->pciDomainID(),
                     thread->pciBusID(),
-                    thread->pciDeviceID(),
-                    cool.CurrentTemp,
+                    thread->pciDeviceID(),                    
                     Hashrate::format(m_hashrate->calc(i, Hashrate::ShortInterval), num1, sizeof num1),
                     Hashrate::format(m_hashrate->calc(i, Hashrate::MediumInterval), num2, sizeof num2),
                     Hashrate::format(m_hashrate->calc(i, Hashrate::LargeInterval), num3, sizeof num3),
-                    cool.CurrentFan
+                    cool->CurrentTemp,
+                    cool->CurrentFanLevel
                 );
 
                 i++;
-                AdlUtils::ReleaseADL(&cool, false);
             }
-            else {
-                LOG_ERR("Failed to init ADL library");
-            }
+         
         }
+
+
+    //m_hashrate->print();
+}
+
+void Workers::printHealth()
+{
+    
+    uv_rwlock_rdlock(&m_rwlock);
+
+    const bool isColors = m_controller->config()->isColors();
+      
+    const size_t platformIndex            = static_cast<size_t>( m_controller->config()->platformIndex());
+    std::vector<cl_platform_id> platforms = OclLib::getPlatformIDs();
+    std::vector<GpuContext> ctxVec;
+
+    cl_uint num_devices = 0;
+    OclLib::getDeviceIDs(platforms[platformIndex], CL_DEVICE_TYPE_GPU, 0, nullptr, &num_devices);
+    if (num_devices == 0) {
+        LOG_ERR("No devices found for platform %i", platforms[platformIndex]);
+        return;
     }
 
-    m_hashrate->print();
+    cl_device_id *device_list = new cl_device_id[num_devices];
+    OclLib::getDeviceIDs(platforms[platformIndex], CL_DEVICE_TYPE_GPU, num_devices, device_list, nullptr);
+
+    //LOG_INFO("GPU |     PCI    | 10s H/s | 60s H/s | 15m H/s | MHz |  MEM | TEMP |  FAN |", isColors ? "\x1B[1;37m" : "");
+
+    int matchcount;
+    for (cl_uint i = 0; i < num_devices; i++) {
+        GpuContext ctx;
+        ctx.deviceIdx    = i;
+        ctx.platformIdx  = platformIndex;
+        ctx.DeviceID     = device_list[i];
+        ctx.computeUnits = OclLib::getDeviceMaxComputeUnits(ctx.DeviceID);
+        ctx.vendor       = OclLib::getDeviceVendor(ctx.DeviceID);
+
+        if (ctx.vendor == xmrig::OCL_VENDOR_UNKNOWN) {
+            continue;
+        }
+
+        OclLib::getDeviceInfo(ctx.DeviceID, CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(size_t), &ctx.freeMem);
+        OclLib::getDeviceInfo(ctx.DeviceID, CL_DEVICE_GLOBAL_MEM_SIZE,    sizeof(size_t), &ctx.globalMem);
+        // if environment variable GPU_SINGLE_ALLOC_PERCENT is not set we can not allocate the full memory
+        ctx.freeMem = std::min(ctx.freeMem, ctx.globalMem);
+
+        ctx.board = OclLib::getDeviceBoardName(ctx.DeviceID);
+        ctx.name  = OclLib::getDeviceName(ctx.DeviceID);
+
+        int CardID = i;
+        if (OclCLI::getPCIInfo(&ctx, CardID) != CL_SUCCESS) {
+            LOG_ERR("Cannot get PCI information for Card %i", CardID);
+        }
+
+        //thread->setPciBusID(contexts[i]->device_pciBusID);
+        //thread->setPciDeviceID(contexts[i]->device_pciDeviceID);
+        //thread->setPciDomainID(contexts[i]->device_pciDomainID);
+
+
+
+        size_t it = 0;
+        matchcount = 0;
+        CoolingContext coollocal;
+        for (xmrig::IThread *t : m_controller->config()->threads()) {
+            auto thread = static_cast<const xmrig::OclThread *>(t);
+            CoolingContext *cool = thread->cool();
+                
+                //LOG_DEBUG("Cool=%i", cool);
+
+                // Check if this thread belongs to this card
+                if (ctx.device_pciBusID == cool->PciBus)
+                {
+                    matchcount++;
+
+                    AdlUtils::GetMaxFanRpm(cool);
+                    AdlUtils::Temperature(cool);                
+                    AdlUtils::GetFanPercent(cool, NULL);
+                    AdlUtils::Get_GPU_Power(cool, thread);
+                    AdlUtils::Get_GPU_Busy(cool, thread);
+
+                    if (matchcount == 1)
+                    {
+                        coollocal.GPUIndex = cool->GPUIndex;
+                        //LOG_INFO("GPUIndex=%i", coollocal.GPUIndex);
+                        coollocal.Busy = cool->Busy;
+                        coollocal.Power = cool->Busy;
+                    }
+                    else
+                    {
+                        coollocal.GPUIndex = cool->GPUIndex;
+                        //LOG_INFO("GPUIndex=%i", coollocal.GPUIndex);
+                        coollocal.Busy = (coollocal.Busy + cool->Busy) / 2;
+                        coollocal.Power = (coollocal.Power + cool->Power) / 2;
+                    }
+                    it++;
+                }    
+                
+            }
+         
+            if (matchcount > 0)
+            {
+                //LOG_INFO("DEBUG printHashrate Speed %i", percent);
+
+                cl_uint max_clock_freq;
+                if (OclLib::getDeviceInfo(ctx.DeviceID, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(max_clock_freq), &max_clock_freq) != CL_SUCCESS) {
+                    LOG_ERR("Cannot get MAX_CLOCK_FREQUENCY information for Card %i", CardID);
+                }
+    
+
+                LOG_INFO(isColors ? MAGENTA("GPU #%i: |") " " YELLOW("PCI:%04x:%02x:%02x |") " " MAGENTA_BOLD("%i MHz | %i PWR | %i%% BUSY")
+                                                            : "GPU #%i: | PCI:%04x:%02x:%02x | %u MHz | %i PWR | %i%% BUSY ",
+                        ctx.deviceIdx,  //CardID,
+                        ctx.device_pciDomainID, ctx.device_pciBusID, ctx.device_pciDeviceID,
+                        max_clock_freq, coollocal.Power, coollocal.Busy
+                        );
+            }         
+        
+                   
+
+        ctxVec.push_back(ctx);
+    }
+
+
+    delete [] device_list;
+
+    
+    uv_rwlock_rdunlock(&m_rwlock);
 }
+
 /*
 void Workers::printHashrate(bool detail)
 {

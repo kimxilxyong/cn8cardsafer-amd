@@ -16,26 +16,7 @@
 // Optional Memory de-allocation function
 //void __stdcall ADL_Main_Memory_Free(void* lpBuffer);
 
-typedef struct _CoolingContext {
-	int SleepFactor = 0;
-	int LastTemp = 0;
-	int LastTick = 0;
-	int CurrentTemp = 0;
-	int CurrentFan = 0;
-	bool NeedsCooling = false;
-	bool FanIsAutomatic = false;
-	bool IsFanControlEnabled = false;
-	int pciBus = -1;
-	int Card = -1;
-#ifdef __linux__
-	std::ifstream ifsTemp;
-	std::ifstream ifsFan;
-#else
-    ADL_CONTEXT_HANDLE context;
-    int MaxFanSpeed;
-#endif
-	//uv_mutex_t m_mutex;
-} CoolingContext;
+
 
 class AdlUtils
 {
@@ -43,9 +24,11 @@ public:
 	
 	static bool InitADL(CoolingContext *cool);
 	static bool ReleaseADL(CoolingContext *cool, bool bReset);
-    static bool Get_DeviceID_by_PCI(CoolingContext *cool, xmrig::OclThread * thread);
-	static bool Get_DeviceID_by_PCI_Linux(CoolingContext *cool, xmrig::OclThread * thread);
-	static bool Get_DeviceID_by_PCI_Windows(CoolingContext *cool, xmrig::OclThread * thread);
+    static bool Get_DeviceID_by_PCI(CoolingContext *cool, const xmrig::OclThread * thread);
+	static bool Get_DeviceID_by_PCI_Linux(CoolingContext *cool, const xmrig::OclThread * thread);
+	static bool Get_DeviceID_by_PCI_Windows(CoolingContext *cool, const xmrig::OclThread * thread);
+	static bool Get_GPU_Busy(CoolingContext *cool, const xmrig::OclThread * thread);
+	static bool Get_GPU_Power(CoolingContext *cool, const xmrig::OclThread * thread);
 	static bool Temperature(CoolingContext *cool);
 	static bool TemperatureLinux(CoolingContext *cool);
 	static bool TemperatureWindows(CoolingContext *cool);
@@ -60,7 +43,7 @@ public:
     static bool GetMaxFanRpm(CoolingContext *cool);
 	
 	#ifdef __linux__
-    static int GetTickCount(void);
+    static ulong GetTickCount(void);
     #endif
 };
 

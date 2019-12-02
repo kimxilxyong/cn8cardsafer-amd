@@ -83,15 +83,17 @@ void OclWorker::start()
     bool IsCoolingEnabled = false;
 
     CoolingContext cool;
+    cool.LastTick = AdlUtils::GetTickCount();
 
     m_thread->setThreadId(m_id);
+    m_thread->setCoolingContext(&cool);
 
-    cool.pciBus = m_ctx->device_pciBusID;
+    cool.PciBus = m_ctx->device_pciBusID;
     cool.Card = m_ctx->deviceIdx;
 
     //Workers::addWorkercount();
 
-    OclCache::sleep(50000);
+    //OclCache::sleep(50000);
     
     //LOG_INFO("m_thread->pciBusID() = %x, cool.pciBus = %x, m_thread->cardId = %i, cool.Card = %i", m_thread->pciBusID(), cool.pciBus, m_thread->cardId(), cool.Card);
 

@@ -28,6 +28,8 @@
 
 #include "common/xmrig.h"
 #include "interfaces/IThread.h"
+#include "amd/CoolingContext.h"
+//#include "amd/AdlUtils.h"
 
 
 struct GpuContext;
@@ -86,6 +88,9 @@ public:
     void setUnrollFactor(int unrollFactor);
     void setWorksize(size_t worksize);
 
+    inline CoolingContext* cool() const { return m_cool; }
+    inline void setCoolingContext(CoolingContext *cool) {m_cool = cool; }
+
 protected:
 #   ifdef APP_DEBUG
     void print() const override;
@@ -108,6 +113,8 @@ private:
     uint32_t m_pciBusID;
     uint32_t m_pciDeviceID;
     uint32_t m_pciDomainID;
+
+    CoolingContext *m_cool;
 };
 
 
